@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { usePlayer } from '../store/useGameStore.js';
-import Avatar from './Avatar.jsx';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const location = useLocation();
-  const player = usePlayer();
 
 
 
@@ -49,81 +45,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right — player info — Right Col */}
+          {/* Right Col — Empty Spacer */}
           <div className="flex justify-end items-center">
-            {location.pathname !== '/tug-of-war' ? (
-              <div className="hidden md:flex items-center gap-4 font-body relative">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-navy/5 text-navy text-sm font-bold border border-navy/10">
-                  <span className="text-pink">⭐</span>
-                  <span>{player.totalStars}</span>
-                </div>
-                
-                {/* Avatar Dropdown Trigger */}
-                <button 
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="p-0.5 rounded-full border-2 border-pink/20 transition-all hover:border-pink hover:scale-105 active:scale-95 flex items-center justify-center outline-none"
-                  title={player.playerName || 'Player'}
-                >
-                  <Avatar avatarId={player.avatarId} size="sm" />
-                </button>
-
-                {/* User Dropdown Menu */}
-                {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-2xl shadow-2xl border border-navy/5 py-3 z-[60] animate-fade-rise overflow-hidden">
-                    <ul className="font-mono text-[11px] font-bold uppercase tracking-widest text-navy">
-                      <li>
-                        <Link 
-                          to="/profile" 
-                          className="flex items-center px-6 py-3 hover:bg-pink/5 hover:text-pink transition-colors"
-                          onClick={() => setUserDropdownOpen(false)}
-                        >
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          to="/dashboard" 
-                          className="flex items-center px-6 py-3 hover:bg-pink/5 hover:text-pink transition-colors"
-                          onClick={() => setUserDropdownOpen(false)}
-                        >
-                          Dashboard
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          to="/settings" 
-                          className="flex items-center px-6 py-3 hover:bg-pink/5 hover:text-pink transition-colors"
-                          onClick={() => setUserDropdownOpen(false)}
-                        >
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          to="/earnings" 
-                          className="flex items-center px-6 py-3 hover:bg-pink/5 hover:text-pink transition-colors"
-                          onClick={() => setUserDropdownOpen(false)}
-                        >
-                          Earnings
-                        </Link>
-                      </li>
-                      <li className="border-t border-navy/5 mt-2 pt-2">
-                        <button 
-                          className="flex w-full items-center px-6 py-3 text-red-500 hover:bg-red-50 transition-colors"
-                          onClick={() => setUserDropdownOpen(false)}
-                        >
-                          Sign Out
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Empty spacer for the grid when in game */
-              <div className="hidden md:block w-32" />
-            )}
-
             {/* Hamburger — mobile */}
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -163,20 +86,7 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-            {/* Player row */}
-            {location.pathname !== '/tug-of-war' && (
-              <div className="flex items-center gap-4 pt-4 border-t border-navy/5 mt-4">
-                <div className="p-0.5 rounded-full border-2 border-pink/20">
-                  <Avatar avatarId={player.avatarId} size="sm" />
-                </div>
-                <span className="text-navy font-bold">
-                  {player.playerName || 'Player'}
-                </span>
-                <span className="ml-auto px-3 py-1 rounded-full bg-navy text-white text-sm font-bold flex items-center gap-2">
-                  <span className="text-pink">⭐</span> {player.totalStars}
-                </span>
-              </div>
-            )}
+
           </div>
         </div>
       )}

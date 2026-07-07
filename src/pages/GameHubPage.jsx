@@ -14,7 +14,7 @@ const GAMES = [
   {
     title: 'Math Tug of War',
     description:
-      'Battle an AI opponent in a 2D tug-of-war powered by correct answers. Pull the rope to your side!',
+      'Race against your opponent to solve math equations and pull the rope to your side. Speed and accuracy take the trophy!',
     icon: '⚔️',
     route: '/tug-of-war',
   },
