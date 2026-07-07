@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --global-bg: #F8F9FC;
+  --primary-text: #1E2551;
+  --secondary-text: #E4C7A3;
+  --accent: #E9429F;
+  --font-main: 'Inter', 'Poppins', sans-serif;
+  --font-display: 'Poppins', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-[#F8F9FC] text-[#1E2551] antialiased;
+    font-family: var(--font-main);
+    font-weight: 500;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-display);
+    font-weight: 800;
+    @apply text-[#1E2551];
+  }
+}
+
+/* Tug of War Pulling animations */
+@keyframes lean-p1 {
+  0%, 100% { transform: translateX(-50%) rotate(10deg) scaleX(-1); }
+  50% { transform: translateX(-50%) rotate(14deg) scaleX(-1); } /* Lean backward right */
+}
+
+@keyframes lean-p2 {
+  0%, 100% { transform: translateX(-50%) rotate(-10deg); }
+  50% { transform: translateX(-50%) rotate(-14deg); } /* Lean backward left */
+}
+
+@keyframes jerk-p1 {
+  0% { transform: translateX(-50%) rotate(12deg) scaleX(-1); }
+  15% { transform: translateX(-50%) rotate(32deg) scaleX(-1); } /* Pull back further */
+  100% { transform: translateX(-50%) rotate(12deg) scaleX(-1); }
+}
+
+@keyframes jerk-p2 {
+  0% { transform: translateX(-50%) rotate(-12deg); }
+  15% { transform: translateX(-50%) rotate(-32deg); } /* Pull back further */
+  100% { transform: translateX(-50%) rotate(-12deg); }
+}
+
+/* New Theme Animations */
+@keyframes fade-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-rise {
+  animation: fade-rise 0.8s ease-out forwards;
+}
+
+.animate-fade-rise-delay {
+  animation: fade-rise 0.8s ease-out 0.2s forwards;
+  opacity: 0; /* Start hidden */
+}
+
+.animate-fade-rise-delay-2 {
+  animation: fade-rise 0.8s ease-out 0.4s forwards;
+  opacity: 0; /* Start hidden */
+}
+
+.animate-lean-p1 {
+  animation: lean-p1 1.5s ease-in-out infinite;
+}
+
+.animate-lean-p2 {
+  animation: lean-p2 1.5s ease-in-out infinite;
+}
+
+.animate-jerk-p1 {
+  animation: jerk-p1 0.5s cubic-bezier(0.12, 0, 0.39, 0);
+}
+
+.animate-jerk-p2 {
+  animation: jerk-p2 0.5s cubic-bezier(0.12, 0, 0.39, 0);
+}
+
