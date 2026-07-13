@@ -9,7 +9,27 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-pink/5 rounded-full blur-3xl -z-10" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[500px] h-[500px] bg-navy/5 rounded-full blur-3xl -z-10" />
 
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        {/* ── Left Flanking Logo ── */}
+        <div className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 hidden md:flex">
+          <img
+            src="/logo latest(050626) (1).jpg"
+            className="h-40 w-40 object-contain"
+            alt="SSGK Gurukul Logo"
+          />
+          <span className="text-3xl font-extrabold text-[#1E2551] tracking-wider text-center mt-2">SSGK</span>
+        </div>
+
+        {/* ── Right Flanking Logo ── */}
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 hidden md:flex">
+          <img
+            src="/logo latest(050626) (1).jpg"
+            className="h-40 w-40 object-contain"
+            alt="SSGK Gurukul Logo"
+          />
+          <span className="text-3xl font-extrabold text-[#1E2551] tracking-wider text-center mt-2">SSGK</span>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
           <div className="inline-block px-4 py-1.5 rounded-full bg-navy/5 text-navy text-sm font-bold tracking-wider uppercase mb-6 animate-fade-rise border border-navy/10">
             India's Premium Math Platform
           </div>

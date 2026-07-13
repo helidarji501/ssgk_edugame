@@ -59,7 +59,7 @@ function PlayerPanel({
     <div className={`w-56 sm:w-64 ${bgClass} rounded-[2rem] border-2 p-5 sm:p-6 shadow-2xl shadow-navy/5 font-body scale-95 origin-top`}>
       {/* Player Label */}
       <div className="flex items-center justify-between mb-4">
-        <span className="px-3 py-1 rounded-full bg-navy/10 text-[9px] font-bold uppercase tracking-widest text-navy border border-navy/10">
+        <span className="px-3 py-1 rounded-full bg-navy/10 text-xs font-bold uppercase tracking-widest text-navy border border-navy/10">
           PLAYER {isP1 ? '2' : '1'}
         </span>
         <span className="text-navy text-[10px] font-bold uppercase tracking-wider">Score: {score}</span>
@@ -100,7 +100,7 @@ function PlayerPanel({
         ))}
         <button
           onClick={handleClear}
-          className="py-2.5 rounded-xl font-bold text-[9px] uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-100 active:scale-95 transition-all"
+          className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-100 active:scale-95 transition-all"
         >
           Clear
         </button>
@@ -137,6 +137,17 @@ function PlayerPanel({
 }
 
 
+
+const BrandingBlock = () => (
+  <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-50 pointer-events-none hidden md:flex">
+    <img
+      src="/logo latest(050626) (1).jpg"
+      className="h-16 w-16 object-contain"
+      alt="SSGK Gurukul Logo"
+    />
+    <span className="text-sm font-bold tracking-wide text-[#1E2551]">SSGK</span>
+  </div>
+);
 
 export default function TugOfWarGame() {
   const navigate = useNavigate();
@@ -245,7 +256,7 @@ export default function TugOfWarGame() {
   // ─── Render Helper ───
   if (gameState === 'idle') {
     return (
-      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30 overflow-x-hidden">
+      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30 overflow-x-hidden relative">
         <div className="flex flex-col items-center text-center w-full max-w-4xl">
           <span className="text-7xl mb-8 animate-bounce">⚔️</span>
           <h1 className="text-6xl md:text-7xl font-heading font-extrabold text-[#1E2551] tracking-tighter mb-8">
@@ -288,7 +299,7 @@ export default function TugOfWarGame() {
 
   if (gameState === 'countdown') {
     return (
-      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-center p-6 text-center font-body selection:bg-pink/30">
+      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-center p-6 text-center font-body selection:bg-pink/30 relative">
         <h2 className="text-[#1E2551] text-5xl md:text-6xl font-black tracking-wider mb-4 uppercase animate-fade-in">
           Get Ready!
         </h2>
@@ -301,7 +312,7 @@ export default function TugOfWarGame() {
 
   if (isGameOver) {
     return (
-      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30">
+      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30 relative">
         <div className="flex flex-col items-center text-center w-full max-w-4xl px-4">
           <span className="text-7xl sm:text-8xl mb-6 transform hover:scale-110 transition-transform cursor-pointer">🏆</span>
           <h2 className="text-6xl md:text-8xl font-heading font-extrabold tracking-tighter mb-4 text-[#1E2551]">
@@ -347,6 +358,7 @@ export default function TugOfWarGame() {
   // 4. MAIN GAME ARENA
   return (
     <div ref={containerRef} className="w-full h-[calc(100vh-64px)] overflow-hidden relative z-10 bg-[#E4C7A3] select-none font-body">
+      <BrandingBlock />
       {/* ─── Central Animation Stage ─── */}
       <div className="absolute inset-0 flex flex-col justify-end items-center z-0 pointer-events-none pb-[10vh]">
         {/* Sky/Stars */}

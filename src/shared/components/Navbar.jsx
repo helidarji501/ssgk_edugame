@@ -13,10 +13,13 @@ export default function Navbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
+  const isGames  = location.pathname === '/games';
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#F8F9FC]/80 backdrop-blur-md border-b border-navy/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="sticky top-0 z-50 relative">
+    <nav className="bg-[#F8F9FC]/80 backdrop-blur-md border-b border-navy/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+
         <div className="grid grid-cols-3 items-center h-16">
           {/* Logo — Left Col */}
           <div className="flex justify-start">
@@ -91,6 +94,19 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+
+      {/* ── SSGK Gurukul logo — absolutely positioned below navbar, Games page only ── */}
+      {isGames && (
+        <div className="absolute top-24 left-12 flex flex-col items-center gap-2 z-30">
+          <img
+            src="/logo latest(050626) (1).jpg"
+            className="h-24 w-24 object-contain"
+            alt="SSGK Gurukul Logo"
+          />
+          <span className="text-lg font-extrabold text-[#1E2551] tracking-wider text-center">SSGK</span>
+        </div>
+      )}
+    </div>
 
   );
 }
