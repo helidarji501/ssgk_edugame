@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useTugOfWar from './useTugOfWar.js';
 import { formatQuestion } from '../../shared/utils/mathUtils.js';
 import Lottie from 'lottie-react';
 import celebrationData from '../../assets/QThgNwbRW6.json';
+import { Volume2, VolumeX } from 'lucide-react';
 
 
 // Player Panel Component for each side
@@ -56,7 +57,7 @@ function PlayerPanel({
   const submitClass = 'bg-navy border-navy hover:bg-pink';
 
   return (
-    <div className={`w-56 sm:w-64 ${bgClass} rounded-[2rem] border-2 p-5 sm:p-6 shadow-2xl shadow-navy/5 font-body scale-95 origin-top`}>
+    <div className={`w-full max-w-sm lg:w-56 xl:w-60 ${bgClass} rounded-[2rem] border-2 p-4 sm:p-5 shadow-2xl shadow-navy/5 font-body`}>
       {/* Player Label */}
       <div className="flex items-center justify-between mb-4">
         <span className="px-3 py-1 rounded-full bg-navy/10 text-xs font-bold uppercase tracking-widest text-navy border border-navy/10">
@@ -88,31 +89,31 @@ function PlayerPanel({
       </div>
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-3 gap-1.5 mb-3">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
           <button
             key={n}
             onClick={() => handleNum(n.toString())}
-            className="py-2.5 rounded-xl font-bold text-xl text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
+            className="h-10 rounded-xl font-bold text-lg text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
           >
             {n}
           </button>
         ))}
         <button
           onClick={handleClear}
-          className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-100 active:scale-95 transition-all"
+          className="h-10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-100 active:scale-95 transition-all"
         >
           Clear
         </button>
         <button
           onClick={() => handleNum('0')}
-          className="py-2.5 rounded-xl font-bold text-xl text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
+          className="h-10 rounded-xl font-bold text-lg text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
         >
           0
         </button>
         <button
           onClick={handleBackspace}
-          className="py-2.5 rounded-xl font-bold text-lg text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
+          className="h-10 rounded-xl font-bold text-base text-navy bg-navy/5 hover:bg-pink/5 hover:text-pink active:scale-95 transition-all border border-transparent hover:border-pink/20"
         >
           ⌫
         </button>
@@ -151,6 +152,8 @@ const BrandingBlock = () => (
 
 export default function TugOfWarGame() {
   const navigate = useNavigate();
+  const audioRef = useRef(null);
+  const fadeIntervalRef = useRef(null);
 
   const {
     containerRef,
@@ -176,6 +179,93 @@ export default function TugOfWarGame() {
     resetGame,
   } = useTugOfWar();
 
+  // ─── Audio: Initialise once ───
+  useEffect(() => {
+    const audio = new Audio('/run-amok.mp3');
+    audio.loop = true;
+    audio.volume = 0.6;
+    audioRef.current = audio;
+
+    return () => {
+      // Cleanup on unmount
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  // ─── Audio: Play when game starts (gameState transitions to 'playing') ───
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (gameState === 'playing') {
+      // Clear any existing fade and reset volume before playing
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      audioRef.current.volume = 0.6;
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {/* autoplay policy — silently ignore */});
+    }
+  }, [gameState]);
+
+  // ─── Audio: Fade out when game ends ───
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const isOver = gameState === 'p1_won' || gameState === 'p2_won';
+    if (isOver) {
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      const totalDuration = 1600; // ms
+      const steps = 32;
+      const stepDelay = totalDuration / steps;
+      const volumeStep = audioRef.current.volume / steps;
+
+      fadeIntervalRef.current = setInterval(() => {
+        if (!audioRef.current) return;
+        const next = Math.max(0, audioRef.current.volume - volumeStep);
+        audioRef.current.volume = next;
+        if (next <= 0) {
+          clearInterval(fadeIntervalRef.current);
+          fadeIntervalRef.current = null;
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current.volume = 0.6; // reset for next game
+        }
+      }, stepDelay);
+    }
+  }, [gameState]);
+
+  // ─── Mute State & Toggle ───
+  const [isMuted, setIsMuted] = useState(false);
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(prev => !prev);
+    }
+  };
+
+  // ─── Shared Mute Button (for non-arena screens) ───
+  const MuteButton = () => (
+    <button
+      onClick={toggleMute}
+      aria-label={isMuted ? 'Unmute background music' : 'Mute background music'}
+      className="absolute top-20 right-6 md:right-12 z-50 p-2.5 bg-white/90 hover:bg-white backdrop-blur-md rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90 border border-slate-200"
+    >
+      {isMuted
+        ? <VolumeX size={18} className="text-[#1E2551]" />
+        : <Volume2 size={18} className="text-[#1E2551]" />}
+    </button>
+  );
+
+  // ─── Arena Mute Button (anchored above Player 1 card) ───
+  const ArenaMuteButton = () => (
+    <button
+      onClick={toggleMute}
+      aria-label={isMuted ? 'Unmute background music' : 'Mute background music'}
+      className="absolute -top-12 right-0 z-50 p-2.5 bg-white/90 hover:bg-white backdrop-blur-md rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90 border border-slate-200"
+    >
+      {isMuted
+        ? <VolumeX size={18} className="text-[#1E2551]" />
+        : <Volume2 size={18} className="text-[#1E2551]" />}
+    </button>
+  );
 
   const isGameOver = gameState === 'p1_won' || gameState === 'p2_won';
 
@@ -257,24 +347,25 @@ export default function TugOfWarGame() {
   if (gameState === 'idle') {
     return (
       <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30 overflow-x-hidden relative">
+        <MuteButton />
         <div className="flex flex-col items-center text-center w-full max-w-4xl">
-          <span className="text-7xl mb-8 animate-bounce">⚔️</span>
-          <h1 className="text-6xl md:text-7xl font-heading font-extrabold text-[#1E2551] tracking-tighter mb-8">
+          <span className="text-5xl sm:text-7xl mb-6 sm:mb-8 animate-bounce">⚔️</span>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-extrabold text-[#1E2551] tracking-tighter mb-6 sm:mb-8">
             Tug of <span className="text-pink">War</span>
           </h1>
           
-          <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 mb-12 border border-white/20 max-w-lg w-full">
-            <ul className="space-y-4 text-[#1E2551] font-bold uppercase tracking-widest text-sm text-left">
-              <li className="flex items-center gap-4">
-                <span className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs">1</span>
+          <div className="bg-white/40 backdrop-blur-md rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 mb-8 sm:mb-12 border border-white/20 max-w-lg w-full">
+            <ul className="space-y-3 sm:space-y-4 text-[#1E2551] font-bold uppercase tracking-widest text-xs sm:text-sm text-left">
+              <li className="flex items-center gap-3 sm:gap-4">
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs shrink-0">1</span>
                 Play with numbers
               </li>
-              <li className="flex items-center gap-4">
-                <span className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs">2</span>
+              <li className="flex items-center gap-3 sm:gap-4">
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs shrink-0">2</span>
                 Submit Right Answers to pull
               </li>
-              <li className="flex items-center gap-4">
-                <span className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs">3</span>
+              <li className="flex items-center gap-3 sm:gap-4">
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy/10 flex items-center justify-center text-xs shrink-0">3</span>
                 Winner takes the trophy
               </li>
             </ul>
@@ -282,16 +373,39 @@ export default function TugOfWarGame() {
 
           <button
             onClick={startGame}
-            className="px-16 py-6 rounded-full bg-[#1E2551] text-white font-bold text-xl hover:bg-pink hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-navy/30 min-w-[300px]"
+            className="w-full max-w-xl mx-auto py-4 rounded-3xl bg-[#1E2551] text-white font-bold text-xl hover:bg-pink hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-navy/30"
           >
             Start Battle
           </button>
           <button
             onClick={() => navigate('/games')}
-            className="mt-8 text-[#1E2551]/40 text-sm font-bold uppercase tracking-widest hover:text-[#1E2551] transition-colors"
+            className="mt-6 sm:mt-8 text-[#1E2551]/40 text-sm font-bold uppercase tracking-widest hover:text-[#1E2551] transition-colors"
           >
             ← Leave Arena
           </button>
+
+          {/* ─── About Music Credits ─── */}
+          <div className="mt-8 p-4 bg-black/10 rounded-xl text-xs text-slate-700 text-center">
+            <h4 className="font-bold text-sm mb-1 text-[#1E2551]">About Music</h4>
+            <p>
+              &ldquo;Run Amok&rdquo; by{' '}
+              <a href="https://incompetech.com/" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-pink transition-colors">
+                Kevin MacLeod
+              </a>
+            </p>
+            <p>
+              Music promoted by{' '}
+              <a href="https://www.chosic.com/free-music/all/" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-pink transition-colors">
+                Chosic
+              </a>
+            </p>
+            <p>
+              Licensed under{' '}
+              <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-pink transition-colors">
+                Creative Commons CC BY 3.0
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -299,11 +413,12 @@ export default function TugOfWarGame() {
 
   if (gameState === 'countdown') {
     return (
-      <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-center p-6 text-center font-body selection:bg-pink/30 relative">
-        <h2 className="text-[#1E2551] text-5xl md:text-6xl font-black tracking-wider mb-4 uppercase animate-fade-in">
+      <div className="w-full min-h-[calc(100vh-80px)] bg-[#E4C7A3] flex flex-col items-center justify-center p-6 text-center font-body selection:bg-pink/30 relative">
+        <MuteButton />
+        <h2 className="text-[#1E2551] text-3xl sm:text-5xl md:text-6xl font-black tracking-wider mb-4 uppercase animate-fade-in">
           Get Ready!
         </h2>
-        <div className="text-[10rem] md:text-[14rem] font-heading font-black text-[#1E2551] leading-none animate-ping">
+        <div className="text-[6rem] sm:text-[10rem] md:text-[14rem] font-heading font-black text-[#1E2551] leading-none animate-ping">
           {countdown}
         </div>
       </div>
@@ -313,39 +428,40 @@ export default function TugOfWarGame() {
   if (isGameOver) {
     return (
       <div className="w-full h-full bg-[#E4C7A3] flex flex-col items-center justify-start pt-24 pb-12 px-4 font-body selection:bg-pink/30 relative">
+        <MuteButton />
         <div className="flex flex-col items-center text-center w-full max-w-4xl px-4">
-          <span className="text-7xl sm:text-8xl mb-6 transform hover:scale-110 transition-transform cursor-pointer">🏆</span>
-          <h2 className="text-6xl md:text-8xl font-heading font-extrabold tracking-tighter mb-4 text-[#1E2551]">
+          <span className="text-5xl sm:text-7xl sm:text-8xl mb-4 sm:mb-6 transform hover:scale-110 transition-transform cursor-pointer">🏆</span>
+          <h2 className="text-4xl sm:text-6xl md:text-8xl font-heading font-extrabold tracking-tighter mb-4 text-[#1E2551]">
             <span className="text-[#E9429F]">{(winner || 'Player')}</span> Wins!
           </h2>
 
-          <div className="flex justify-center items-center gap-6 sm:gap-10 mt-8 mb-12 flex-wrap">
+          <div className="flex justify-center items-center gap-4 sm:gap-10 mt-6 sm:mt-8 mb-8 sm:mb-12 flex-wrap">
             <div className="text-center group px-2">
-              <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-navy/20 border-2 border-white">
+              <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-navy/20 border-2 border-white">
                 <p className="text-navy font-bold uppercase tracking-[0.2em] text-[10px] mb-3 opacity-60">Player 1</p>
-                <p className="text-navy text-6xl font-extrabold tracking-tighter mb-1">{scoreP2}</p>
+                <p className="text-navy text-5xl sm:text-6xl font-extrabold tracking-tighter mb-1">{scoreP2}</p>
                 <p className="text-pink text-[10px] font-bold uppercase tracking-widest">{correctCountP2} correct</p>
               </div>
             </div>
             <div className="text-center group px-2">
-              <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-navy/20 border-2 border-white">
+              <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-navy/20 border-2 border-white">
                 <p className="text-navy font-bold uppercase tracking-[0.2em] text-[10px] mb-3 opacity-60">Player 2</p>
-                <p className="text-navy text-6xl font-extrabold tracking-tighter mb-1">{scoreP1}</p>
+                <p className="text-navy text-5xl sm:text-6xl font-extrabold tracking-tighter mb-1">{scoreP1}</p>
                 <p className="text-pink text-[10px] font-bold uppercase tracking-widest">{correctCountP1} correct</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 w-full">
             <button
               onClick={() => { resetGame(); startGame(); }}
-              className="px-16 py-5 rounded-full bg-pink text-white font-bold text-xl hover:bg-white hover:text-navy hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-pink/30 min-w-[280px]"
+              className="w-full max-w-[280px] sm:px-16 py-4 sm:py-5 rounded-full bg-pink text-white font-bold text-lg sm:text-xl hover:bg-white hover:text-navy hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-pink/30 sm:min-w-[280px]"
             >
               Battle Again
             </button>
             <button
               onClick={() => { resetGame(); navigate('/games'); }}
-              className="mt-4 text-[#1E2551]/60 text-sm font-bold uppercase tracking-widest hover:text-[#1E2551] transition-colors"
+              className="mt-2 sm:mt-4 text-[#1E2551]/60 text-sm font-bold uppercase tracking-widest hover:text-[#1E2551] transition-colors"
             >
               ← Exit Arena
             </button>
@@ -357,26 +473,49 @@ export default function TugOfWarGame() {
 
   // 4. MAIN GAME ARENA
   return (
-    <div ref={containerRef} className="w-full h-[calc(100vh-64px)] overflow-hidden relative z-10 bg-[#E4C7A3] select-none font-body">
+    <div ref={containerRef} className="w-full min-h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)] overflow-x-hidden relative z-10 bg-[#E4C7A3] select-none font-body flex flex-col lg:block">
       <BrandingBlock />
+
+      {/* ─── Mobile: stacked layout (flex-col) — shown below lg ─── */}
+      {!isCelebrating && (
+        <div className="flex flex-col lg:hidden gap-3 p-3 w-full z-10">
+          <div className="w-full flex justify-center">
+            <PlayerPanel question={p2Question} input={p2Input} setInput={setP2Input} onSubmit={onP2Submit} isP1={false} gameState={gameState} score={scoreP2} />
+          </div>
+          {/* Mute button above P1 panel on mobile */}
+          <div className="w-full flex justify-end pr-2">
+            <button
+              onClick={toggleMute}
+              aria-label={isMuted ? 'Unmute background music' : 'Mute background music'}
+              className="p-2.5 bg-white/90 hover:bg-white backdrop-blur-md rounded-full shadow-md transition-all duration-200 cursor-pointer active:scale-90 border border-slate-200"
+            >
+              {isMuted ? <VolumeX size={16} className="text-[#1E2551]" /> : <Volume2 size={16} className="text-[#1E2551]" />}
+            </button>
+          </div>
+          <div className="w-full flex justify-center">
+            <PlayerPanel question={p1Question} input={p1Input} setInput={setP1Input} onSubmit={onP1Submit} isP1={true} gameState={gameState} score={scoreP1} />
+          </div>
+        </div>
+      )}
+
       {/* ─── Central Animation Stage ─── */}
-      <div className="absolute inset-0 flex flex-col justify-end items-center z-0 pointer-events-none pb-[10vh]">
-        {/* Sky/Stars */}
-        <div className="absolute inset-0 bg-[#E4C7A3] -z-10">
+      <div className="relative lg:absolute lg:inset-0 flex flex-col justify-end items-center z-0 pointer-events-none pb-[10vh] h-52 sm:h-64 lg:h-auto lg:pb-[10vh]">
+        {/* Sky/Stars — hidden on mobile to reduce clutter */}
+        <div className="absolute inset-0 bg-[#E4C7A3] -z-10 hidden lg:block">
           {Array.from({ length: 30 }).map((_, i) => (
             <div key={i} className="absolute w-1 h-1 bg-white/30 rounded-full" style={{ left: `${(i * 137.5) % 100}%`, top: `${(i * 73.3) % 40}%` }} />
           ))}
         </div>
 
         {/* Grass Ground */}
-        <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-[#2D5A1E] -z-10">
+        <div className="absolute bottom-0 left-0 right-0 h-[35%] lg:h-[30%] bg-[#2D5A1E] -z-10">
           <div className="absolute top-0 left-0 right-0 h-2 bg-[#3A7A2E]" />
         </div>
 
         {/* Tug of War Characters (Video) */}
         <video
           src="/final_video.webm" autoPlay loop muted playsInline preload="auto" controls={false}
-          className="z-20 w-[550px] h-auto object-contain mix-blend-multiply transition-all duration-300 block"
+          className="z-20 w-[280px] sm:w-[400px] lg:w-[550px] h-auto object-contain mix-blend-multiply transition-all duration-300 block"
           style={{ 
             position: 'absolute', 
             left: '50%', 
@@ -385,26 +524,31 @@ export default function TugOfWarGame() {
           }}
         />
 
-        {/* Boundary Lines & Ground Markers */}
-        <div className="absolute bottom-[15%] left-0 right-0 h-20 w-full overflow-hidden">
-          {/* Center Marker */}
-          <div className="absolute bottom-0 left-1/2 w-0.5 h-16 border-l-2 border-dashed border-white/60 transform -translate-x-1/2" />
+        {/* Boundary Lines & Ground Markers — simplified on mobile */}
+        <div className="absolute bottom-[18%] lg:bottom-[15%] left-0 right-0 h-20 w-full overflow-hidden">
+          {/* Center Marker — Red */}
+          <div className="absolute bottom-0 left-1/2 w-1 h-12 lg:h-16 bg-red-600/90 transform -translate-x-1/2" />
           
-          {/* P1 Win (Left) */}
-          <div className="absolute bottom-0 left-1/2 w-1 h-16 bg-red-600/80 transform -translate-x-[200.5px]" />
+          {/* P1 Win (Left) — Green */}
+          <div className="hidden lg:block absolute bottom-0 left-1/2 w-1 h-16 bg-green-500/90 transform -translate-x-[200.5px]" />
           
-          {/* P2 Win (Right) */}
-          <div className="absolute bottom-0 left-1/2 w-1 h-16 bg-green-600/80 transform translate-x-[199.5px]" />
+          {/* P2 Win (Right) — Green */}
+          <div className="hidden lg:block absolute bottom-0 left-1/2 w-1 h-16 bg-green-500/90 transform translate-x-[199.5px]" />
         </div>
       </div>
 
+      {/* ─── Desktop: absolute player panels ─── */}
       {!isCelebrating && (
         <>
-          <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10 h-auto">
+          <div className="hidden lg:block absolute left-6 top-1/2 -translate-y-1/2 z-10 h-auto">
             <PlayerPanel question={p2Question} input={p2Input} setInput={setP2Input} onSubmit={onP2Submit} isP1={false} gameState={gameState} score={scoreP2} />
           </div>
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10 h-auto">
-            <PlayerPanel question={p1Question} input={p1Input} setInput={setP1Input} onSubmit={onP1Submit} isP1={true} gameState={gameState} score={scoreP1} />
+          {/* P1 panel wrapped in relative container so ArenaMuteButton can anchor above it */}
+          <div className="hidden lg:block absolute right-6 top-1/2 -translate-y-1/2 z-10 h-auto">
+            <div className="relative">
+              <ArenaMuteButton />
+              <PlayerPanel question={p1Question} input={p1Input} setInput={setP1Input} onSubmit={onP1Submit} isP1={true} gameState={gameState} score={scoreP1} />
+            </div>
           </div>
         </>
       )}

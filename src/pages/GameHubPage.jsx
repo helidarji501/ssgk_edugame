@@ -39,16 +39,16 @@ export default function GameHubPage() {
   const setTopic = useGameStore((s) => s.setTopic);
 
   return (
-    <div className="min-h-screen bg-off-white font-body py-12 px-4 selection:bg-pink/30">
+    <div className="min-h-screen bg-off-white font-body py-8 sm:py-12 px-4 selection:bg-pink/30">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-16 text-center animate-fade-rise">
+        <header className="mb-10 sm:mb-16 text-center animate-fade-rise">
           <div className="inline-block px-3 py-1 rounded-full bg-navy/5 text-navy text-xs font-bold tracking-widest uppercase mb-4 border border-navy/10">
             Game Menu
           </div>
-          <h1 className="text-5xl md:text-6xl font-heading font-extrabold text-navy tracking-tighter mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold text-navy tracking-tighter mb-4">
             Pick Your <span className="text-pink underline decoration-pink/20 underline-offset-8">Challenge</span>
           </h1>
-          <p className="text-navy/60 font-medium text-lg max-w-xl mx-auto">
+          <p className="text-navy/60 font-medium text-base sm:text-lg max-w-xl mx-auto">
             Three distinct arenas to test your speed, accuracy, and tactical thinking.
           </p>
         </header>
@@ -85,7 +85,7 @@ export default function GameHubPage() {
         </div>
 
         {/* ─── Game Cards ─── */}
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {GAMES.map((game) => (
             <GameCard
               key={game.route}

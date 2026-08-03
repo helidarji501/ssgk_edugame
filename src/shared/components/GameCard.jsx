@@ -13,7 +13,7 @@ export default function GameCard({ title, description, icon, route, difficulty, 
   return (
     <div
       onClick={() => navigate(route)}
-      className="group relative bg-white rounded-[2rem] p-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-navy/5 border-2 border-pink/10 hover:border-pink/40 flex flex-col items-center text-center cursor-pointer overflow-hidden font-body"
+      className="group relative bg-white rounded-[2rem] p-6 sm:p-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-navy/5 border-2 border-pink/10 hover:border-pink/40 flex flex-col items-center text-center cursor-pointer overflow-hidden font-body"
     >
       {/* Kraft Paper texture overlay (subtle) */}
       <div className="absolute inset-0 bg-kraft/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -23,15 +23,15 @@ export default function GameCard({ title, description, icon, route, difficulty, 
         {badge.label}
       </div>
 
-      <div className="text-7xl mb-8 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+      <div className="text-5xl sm:text-7xl mb-6 sm:mb-8 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
         {icon}
       </div>
       
-      <h3 className="text-3xl font-heading font-extrabold text-navy mb-4 tracking-tighter">
+      <h3 className="text-2xl sm:text-3xl font-heading font-extrabold text-navy mb-3 sm:mb-4 tracking-tighter">
         {title}
       </h3>
       
-      <p className="text-navy/60 font-medium text-sm leading-relaxed mb-10">
+      <p className="text-navy/60 font-medium text-sm leading-relaxed mb-6 sm:mb-10">
         {description}
       </p>
 

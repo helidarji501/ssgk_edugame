@@ -18,14 +18,14 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 relative">
     <nav className="bg-[#F8F9FC]/80 backdrop-blur-md border-b border-navy/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
 
-        <div className="grid grid-cols-3 items-center h-16">
+        <div className="grid grid-cols-3 items-center h-14 md:h-16">
           {/* Logo — Left Col */}
           <div className="flex justify-start">
             <Link to="/" className="flex items-center gap-2 shrink-0 group">
-              <span className="text-3xl transition-transform group-hover:scale-110">🧮</span>
-              <span className="text-xl font-heading font-extrabold text-navy tracking-tight">
+              <span className="text-2xl md:text-3xl transition-transform group-hover:scale-110">🧮</span>
+              <span className="text-xl md:text-2xl font-heading font-extrabold text-navy tracking-tight">
                 MathQuest
               </span>
             </Link>
@@ -97,13 +97,13 @@ export default function Navbar() {
 
       {/* ── SSGK Gurukul logo — absolutely positioned below navbar, Games page only ── */}
       {isGames && (
-        <div className="absolute top-24 left-12 flex flex-col items-center gap-2 z-30">
+        <div className="absolute top-20 md:top-24 left-3 sm:left-6 md:left-12 flex flex-col items-center gap-1 z-30">
           <img
             src="/logo latest(050626) (1).jpg"
-            className="h-24 w-24 object-contain"
+            className="h-14 w-14 sm:h-18 sm:w-18 md:h-24 md:w-24 object-contain"
             alt="SSGK Gurukul Logo"
           />
-          <span className="text-lg font-extrabold text-[#1E2551] tracking-wider text-center">SSGK</span>
+          <span className="text-sm md:text-lg font-extrabold text-[#1E2551] tracking-wider text-center">SSGK</span>
         </div>
       )}
     </div>
